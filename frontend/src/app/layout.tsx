@@ -1,9 +1,10 @@
 'use client'
-import './globals.css'
-import type { Metadata } from 'next'
-import { Inter } from 'next/font/google'
-import { AuthContextProvider } from './context/AuthContext'
-import { ApolloWrapper } from './ApolloWrapper'
+import "bootstrap/dist/css/bootstrap.min.css"; // Import bootstrap CSS
+import './globals.css';
+
+import { Inter } from 'next/font/google';
+import { ApolloWrapper } from './ApolloWrapper';
+import { useEffect } from "react";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -14,6 +15,11 @@ export default function RootLayout({
 }: {
   children: React.ReactNode
 }) {
+
+  useEffect(() => {
+    require("bootstrap/dist/js/bootstrap.bundle.min.js");
+  }, []);
+
   return (
     <html lang="en">
       {/*
