@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "dbaeumer.vscode-eslint",
+    "esbenp.prettier-vscode",
+    "mgmcdermott.vscode-language-babel",
+    "mongodb.mongodb-vscode",
+    "xabikos.ReactSnippets",
+    "eamodio.gitlens",
+    "christian-kohler.path-intellisense"
+  ]
+}
