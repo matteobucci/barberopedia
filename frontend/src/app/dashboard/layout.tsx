@@ -9,6 +9,7 @@ import { useRouter } from "next/navigation";
 import signOut from "../../firebase/auth/signout";
 import Link from "next/link";
 import { ApolloWrapper } from "../ApolloWrapper";
+import { useQuery } from "@apollo/client";
 
 export default function DashboardLayout({
   children, // will be a page or nested layout
@@ -37,19 +38,23 @@ export default function DashboardLayout({
       <AuthContext.Consumer>
         {({ userContext }: any) => {
 
+          console.log("userContext", userContext);
+
+          console.log("userContext?.user?.accessToken", userContext?.user?.accessToken)
+
           return (
-            <ApolloWrapper token={userContext?.accessToken}>
+            <ApolloWrapper token={userContext?.user?.accessToken}>
               <section>
                 <nav>
                   <ul>
                     <li>
-                      <Link href="/dashboard">Home</Link>
+                      <Link href="/dashboard/lessons">Lessons</Link>
                     </li>
                     <li>
-                      <Link href="/dashboard/admin">About</Link>
+                      <Link href="/dashboard/video">Video</Link>
                     </li>
                     <li>
-                      <Link href="/dashboard">Contact</Link>
+                      <Link href="/dashboard/lessons">Contact</Link>
                     </li>
                   </ul>
                   <div>

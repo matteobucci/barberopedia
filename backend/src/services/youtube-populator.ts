@@ -2,11 +2,14 @@ import { google, youtube_v3 } from 'googleapis';
 
 
 export interface BasicVideoInfo {
+    id: string;
     title: string;
     description: string;
     duration: string;
     publishedAt: string;
     thumbnail: string;
+    channelId: string;
+    channelName: string;
 }
 
 export class YoutubeVideoImporter {
@@ -37,6 +40,9 @@ export class YoutubeVideoImporter {
                 const duration = video.contentDetails?.duration as string;
                 const publishedAt = video.snippet?.publishedAt as string;
                 const thumbnail = video.snippet?.thumbnails?.default?.url as string;
+                const channelId = video.snippet?.channelId as string;
+                const channelName = video.snippet?.channelTitle as string;
+
 
                 return {
                     title,
@@ -44,6 +50,9 @@ export class YoutubeVideoImporter {
                     duration, // Es. PT1H9M1S
                     publishedAt,
                     thumbnail,
+                    channelId,
+                    channelName,
+                    id: videoId
                 };
 
             }else{

@@ -1,64 +1,54 @@
 "use client";
 // ^ this file needs the "use client" pragma
 
-import { ApolloLink, HttpLink } from "@apollo/client";
-import {
-  ApolloNextAppProvider,
-  NextSSRInMemoryCache,
-  NextSSRApolloClient,
-  SSRMultipartLink,
-} from "@apollo/experimental-nextjs-app-support/ssr";
+import { ApolloClient, ApolloProvider, InMemoryCache, createHttpLink } from "@apollo/client";
+import { setContext } from '@apollo/client/link/context';
 import { PropsWithChildren } from "react";
 
-function makeClient(token: string) {
+const httpLink = createHttpLink({
+  uri: 'http://localhost:5050/graphql',
+});
 
-  console.log("token", token);
-
-  const httpLink = new HttpLink({
-    // this needs to be an absolute url, as relative urls cannot be used in SSR
-    uri: "http://localhost:5050/graphql",
-    // you can disable result caching here if you want to
-    // (this does not work if you are rendering your page with `export const dynamic = "force-static"`)
-    fetchOptions: { cache: "no-store" },
-    // you can override the default `fetchOptions` on a per query basis
-    // via the `context` property on the options passed as a second argument
-    // to an Apollo Client data fetching hook, e.g.:
-    // const { data } = useSuspenseQuery(MY_QUERY, { context: { fetchOptions: { cache: "force-cache" }}});
-  });
-
-  return new NextSSRApolloClient({
-    // use the `NextSSRInMemoryCache`, not the normal `InMemoryCache`
-    cache: new NextSSRInMemoryCache(),
+const authLink = setContext((_, { headers }) => {
+  // get the authentication token from local storage if it exists
+  const token = localStorage.getItem('token');
+  // return the headers to the context so httpLink can read them
+  return {
     headers: {
-      authorization: `Bearer ${token}`
-    },
-    link:
-      typeof window === "undefined"
-        ? ApolloLink.from([
-            // in a SSR environment, if you use multipart features like
-            // @defer, you need to decide how to handle these.
-            // This strips all interfaces with a `@defer` directive from your queries.
-            new SSRMultipartLink({
-              stripDefer: true,
-            }),
-            httpLink,
-          ])
-        : httpLink,
-  });
-}
+      ...headers,
+      authorization: token ? `Bearer ${token}` : "",
+    }
+  }
+});
+
+const client = new ApolloClient({
+  link: authLink.concat(httpLink),
+  cache: new InMemoryCache()
+});
 
 interface ApolloWrapperProps {
   token: string;
 }
 
-export function ApolloWrapper({ children, token }: PropsWithChildren<ApolloWrapperProps>) {
-  const makeClientWithAuth = (token: string) => {
-    return makeClient(token);
-  };
+export function ApolloWrapper({
+  children,
+  token
+}: PropsWithChildren<ApolloWrapperProps>) {
+
+  // const { data: session } = useSession();
+  // const sessionRef = useRef(session);
+  // useEffect(() => {
+  //   sessionRef.current = session;
+  // }, [session]);
+
+  // const makeClientWithAuth = React.useCallback(
+  //   () => makeClient(token),
+  //   [token]
+  // );
 
   return (
-    <ApolloNextAppProvider makeClient={() => makeClientWithAuth(token)}>
+    <ApolloProvider client={client}>
       {children}
-    </ApolloNextAppProvider>
+    </ApolloProvider>
   );
 }

@@ -5,6 +5,7 @@ import { Character } from 'models/character';
 import { HistoricalReference } from 'models/historicalReference';
 import { ILesson, Lesson } from 'models/lesson';
 import { Video } from 'models/video';
+import { analyzeYoutubeVideo } from './handlers';
 
 const customizationOptions = {};
 
@@ -85,7 +86,7 @@ LessonTC.addRelation(
   {
     resolver: () => CharacterTC.mongooseResolvers.dataLoaderMany(),
     prepareArgs: {
-      _ids: (source: ILesson) =>  source.secondaryCharacters
+      _ids: (source: ILesson) => source.secondaryCharacters
     },
     projection: { secondaryCharacters: 1 },
   }
@@ -96,7 +97,7 @@ LessonTC.addRelation(
   {
     resolver: () => HistoricalReferenceTC.mongooseResolvers.dataLoaderMany(),
     prepareArgs: {
-      _ids: (source: ILesson) =>  source.historicalReferences
+      _ids: (source: ILesson) => source.historicalReferences
     },
     projection: { historicalReferences: 1 },
   }
@@ -138,7 +139,7 @@ VideoTC.getFieldOTC('lessons').addRelation(
   {
     resolver: () => LessonTC.mongooseResolvers.findById(),
     prepareArgs: {
-      _id: (source: {lessonId: string}) =>  source.lessonId
+      _id: (source: { lessonId: string }) => source.lessonId
     },
     projection: { lessons: 1 },
   }
@@ -171,6 +172,30 @@ schemaComposer.Mutation.addFields({
   videoRemoveById: VideoTC.mongooseResolvers.removeById(),
   videoRemoveOne: VideoTC.mongooseResolvers.removeOne(),
   videoRemoveMany: VideoTC.mongooseResolvers.removeMany(),
+});
+
+
+const analyzeUrlResolver = schemaComposer.createResolver({
+  name: 'analyzeUrl',
+  type: `type AnalyzeUrl {
+            title: String!
+            description: String!
+            duration: String!
+            publishedAt: String!
+            thumbnail: String!
+            channelId: String!
+            channelName: String!
+            id: String!
+        }`,
+  args: {
+    url: 'String!',
+  },
+  resolve: analyzeYoutubeVideo
+});
+
+// And add this resolver to your Schema
+schemaComposer.Query.addFields({
+  analyzeUrl: analyzeUrlResolver,
 });
 
 const schema = schemaComposer.buildSchema();

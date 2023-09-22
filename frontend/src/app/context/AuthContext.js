@@ -21,6 +21,7 @@ export const AuthContextProvider = ({
     React.useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
+                localStorage.setItem('token', user.getIdToken());
                 setUser({user});
             } else {
                 setUser(null);

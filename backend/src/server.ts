@@ -10,6 +10,7 @@ const uri = process.env.MONGODB_URI || 'mongodb://localhost:27017/barberopedia';
 
 import db from './config/index'
 
+
 const server = fastify({
   ajv: {
     customOptions: {
