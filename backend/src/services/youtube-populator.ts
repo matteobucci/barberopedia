@@ -1,16 +1,5 @@
 import { google, youtube_v3 } from 'googleapis';
-
-
-export interface BasicVideoInfo {
-    id: string;
-    title: string;
-    description: string;
-    duration: string;
-    publishedAt: string;
-    thumbnail: string;
-    channelId: string;
-    channelName: string;
-}
+import { AnalyzedVideo, IAnalyzedVideo } from 'models/analyzedVideo';
 
 export class YoutubeVideoImporter {
 
@@ -23,7 +12,7 @@ export class YoutubeVideoImporter {
         });
     }
 
-    async importVideoById(videoId: string): Promise<BasicVideoInfo> {
+    async importVideoById(videoId: string): Promise<IAnalyzedVideo> {
         const response = await this.youtube.videos.list({
             part: ['snippet','contentDetails'],
             id: [videoId]
@@ -42,9 +31,13 @@ export class YoutubeVideoImporter {
                 const thumbnail = video.snippet?.thumbnails?.default?.url as string;
                 const channelId = video.snippet?.channelId as string;
                 const channelName = video.snippet?.channelTitle as string;
+                const lastFetchOn = new Date();
+                const url = `https://www.youtube.com/watch?v=${videoId}`;
+                const commentCount = Number.parseInt(video.statistics?.commentCount || "0" as string);
+                const likeCount = Number.parseInt(video.statistics?.likeCount || "0" as string);
+                const viewCount = Number.parseInt(video.statistics?.viewCount || "0" as string);
 
-
-                return {
+                return new AnalyzedVideo({
                     title,
                     description,
                     duration, // Es. PT1H9M1S
@@ -52,8 +45,13 @@ export class YoutubeVideoImporter {
                     thumbnail,
                     channelId,
                     channelName,
-                    id: videoId
-                };
+                    videoId: videoId,
+                    lastFetchOn,
+                    url,
+                    likeCount,
+                    commentCount,
+                    viewCount
+                });
 
             }else{
                 throw new Error('No video found');

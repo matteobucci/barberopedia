@@ -1,9 +1,10 @@
 "use client";
 import { useState } from "react";
 import { useQuery, gql, useLazyQuery } from "@apollo/client";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import VideoItem from "./videoitem";
 
 const GET_PAGES = gql`
   query GetPages($filter: FilterFindManyVideoInput) {
@@ -50,21 +51,19 @@ function Page({ params }) {
   }
 
   return (
-    <div>
+    <Container>
       <CreateVideoButton />
       <h2>Videos:</h2>
-      <ul>
+      <Row xs={1} sm={2} md={3} lg={4} xl={5} xxl={5}>
         {console.log(pageData)}
         {pageData &&
           pageData.map((video) => (
-            <li key={video._id}>
-              <Link href={`/dashboard/video/${video._id}`}>
-                {video.name}
-              </Link>
-            </li>
+            <Col key={video._id}>
+              <VideoItem videoData={video} />
+            </Col>
           ))}
-      </ul>
-    </div>
+      </Row>
+    </Container>
   );
 }
 

@@ -13,7 +13,7 @@ const GET_LOCATIONS = gql`
 `;
 
 function Page() {
-    const { loading, error, data } = useQuery(GET_LOCATIONS);
+    const { loading, error, analyzedVideoData: data } = useQuery(GET_LOCATIONS);
   
     if (loading) return <p>Loading...</p>;
     if (error) return <p>Error : {error.message}</p>;

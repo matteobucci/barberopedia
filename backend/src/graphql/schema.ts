@@ -5,7 +5,8 @@ import { Character } from 'models/character';
 import { HistoricalReference } from 'models/historicalReference';
 import { ILesson, Lesson } from 'models/lesson';
 import { Video } from 'models/video';
-import { analyzeYoutubeVideo } from './handlers';
+import { AnalyzeUrlArgs, analyzeYoutubeVideo } from './handlers';
+import { AnalyzedVideo } from 'models/analyzedVideo';
 
 const customizationOptions = {};
 
@@ -174,28 +175,23 @@ schemaComposer.Mutation.addFields({
   videoRemoveMany: VideoTC.mongooseResolvers.removeMany(),
 });
 
+const AnalyzedVideoTC = composeMongoose(AnalyzedVideo, customizationOptions);
 
-const analyzeUrlResolver = schemaComposer.createResolver({
-  name: 'analyzeUrl',
-  type: `type AnalyzeUrl {
-            title: String!
-            description: String!
-            duration: String!
-            publishedAt: String!
-            thumbnail: String!
-            channelId: String!
-            channelName: String!
-            id: String!
-        }`,
+AnalyzedVideoTC.addResolver({
+  name: 'analyzeVideo',
+  type: AnalyzedVideoTC,
   args: {
     url: 'String!',
   },
-  resolve: analyzeYoutubeVideo
+  resolve: async ({ args }: {args: any}) => {
+    const { url } = args;
+    const analyzeVideo = await analyzeYoutubeVideo(url);
+    return analyzeVideo;
+  },
 });
 
-// And add this resolver to your Schema
 schemaComposer.Query.addFields({
-  analyzeUrl: analyzeUrlResolver,
+  analyzeVideo: AnalyzedVideoTC.getResolver('analyzeVideo'),
 });
 
 const schema = schemaComposer.buildSchema();

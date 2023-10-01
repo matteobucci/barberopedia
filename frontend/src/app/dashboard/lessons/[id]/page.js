@@ -6,6 +6,7 @@ import { Form, Button } from "react-bootstrap";
 import GoBackButton from "@/components/navigation/gobackbutton";
 import DeleteButton from "@/components/navigation/deletebutton";
 import { GET_LESSONS } from "../page";
+import Link from "next/link";
 
 const GET_LESSON = gql`
   query GetPage($id: MongoID!) {
@@ -24,6 +25,13 @@ const GET_LESSON = gql`
       }
       description
     }
+    videoMany(filter:{ AND: [{ lessons : {lessonId : $id }}]}){
+      name
+      description
+      source {
+        url
+      }
+    }
   }
 `;
 
@@ -40,7 +48,9 @@ function Page({params}) {
 
 
   const [id, setId] = useState(params.id);
-  const [pageData, setPageData] = useState(null);
+  const [pageData, setLessonData] = useState(null);
+  const [videoData, setVideoData] = useState(null);
+
   
   const router = useRouter();
 
@@ -62,7 +72,8 @@ function Page({params}) {
   });
   
   if (data && !pageData) {
-    setPageData(data.lessonById);
+    setLessonData(data.lessonById);
+    setVideoData(data.videoMany);
   }
 
 
@@ -89,6 +100,15 @@ function Page({params}) {
             {pageData.historicalReferences.map((reference) => (
               <li key={reference.name}>
                 {reference.name} ({reference.startYear}-{reference.endYear})
+              </li>
+            ))}
+          </ul>
+          <h3>Videos:</h3>
+          <ul>
+            {videoData.map((video) => (
+              <li key={video.name}>
+                {video.name} ({video.description})
+                <Link href={video.source.url}>{video.source.url}</Link>
               </li>
             ))}
           </ul>

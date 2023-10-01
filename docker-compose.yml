@@ -16,6 +16,17 @@ services:
         dockerfile: Dockerfile
     container_name: barberopedia-backend
     ports:
+        - '5050:5050'
+    environment:
+        - APP_ENV=development
+    depends_on:
+        - mongodb
+  frontend:
+    build:
+        context: ./frontend
+        dockerfile: Dockerfile
+    container_name: barberopedia-frontend
+    ports:
         - '3000:3000'
     environment:
         - APP_ENV=development

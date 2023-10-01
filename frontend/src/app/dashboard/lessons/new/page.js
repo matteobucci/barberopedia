@@ -7,9 +7,9 @@ import { gql, useLazyQuery } from "@apollo/client";
 import GoBackButton from "@/components/navigation/gobackbutton";
 
 function Page() {
-  const ANALYZE_URL = gql`
-    query AnalyzeUrl($url: String!) {
-        analyzeUrl(url: $url) {
+  const ANALYZE_VIDEO = gql`
+    query AnalyzeVideo($url: String!) {
+      analyzeVideo(url: $url) {
             title
             description
             duration
@@ -17,11 +17,16 @@ function Page() {
             thumbnail
             channelId
             channelName
+            url
+            commentCount 
+            likeCount
+            viewCount
+            lastFetchOn
         }
     }
   `;
 
-  const [analyze, { loading, data, error }] = useLazyQuery(ANALYZE_URL);
+  const [analyze, { loading, data, error }] = useLazyQuery(ANALYZE_VIDEO);
 
   const [inputData, setInputData] = useState({
     name: "",

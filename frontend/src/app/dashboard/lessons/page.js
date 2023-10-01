@@ -48,12 +48,12 @@ function Page({params}) {
   const [id, setId] = useState(params.id);
   const [pageData, setPageData] = useState(null);
 
-  const { loading, error, data } = useQuery(GET_LESSONS, {
+  const { loading, error, analyzedVideoData: data } = useQuery(GET_LESSONS, {
     variables: { id },
   });
   
-  if (data && !pageData) {
-    setPageData(data.lessonMany);
+  if (analyzedVideoData && !pageData) {
+    setPageData(analyzedVideoData.lessonMany);
   }
 
   return (

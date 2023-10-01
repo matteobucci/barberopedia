@@ -3,8 +3,9 @@ import GoBackButton from "@/components/navigation/gobackbutton";
 import { gql, useQuery } from "@apollo/client";
 import Link from "next/link";
 import { useState } from "react";
+import LessonSelector from "../lessonselector";
 
-const GET_PAGE = gql`
+const GET_VIDEO = gql`
   query GetVideo($id: MongoID!) {
     videoById(_id:$id){
       name
@@ -23,39 +24,42 @@ const GET_PAGE = gql`
 `;
 
 
+
+
 function Page({params}) {
 
 
   const [id, setId] = useState(params.id);
-  const [pageData, setPageData] = useState(null);
+  const [videoData, setVideoData] = useState(null);
 
-  const { loading, error, data } = useQuery(GET_PAGE, {
+
+  const { loading, error, analyzedVideoData: data } = useQuery(GET_VIDEO, {
     variables: { id },
   });
   
-  if (data && !pageData) {
-    setPageData(data.videoById);
+  if (data && !videoData) {
+    setVideoData(data.videoById);
   }
-
 
   return (
     <div>
       <GoBackButton />
       {loading && <p>Loading...</p>}
       {error && <p>Error :(</p>}
-      {pageData && (
+      {videoData && (
         <div>
-          <h2>{pageData.name}</h2>
-          <p>{pageData.description}</p>
+          <h2>{videoData.name}</h2>
+          <p>{videoData.description}</p>
           <h3>Source:</h3>
-          <Link href={pageData.source.url}>{pageData.source.url}</Link>
+          <Link href={videoData.source.url}>{videoData.source.url}</Link>
           <h3>Lessons</h3>
           <ul>
-            {pageData.lessons.map((lesson) => (
+            {videoData.lessons.map((lesson) => (
               <li key={lesson.name}>{lesson.name}</li>
             ))}
           </ul>
         </div>
+        
       )}
     </div>
   );

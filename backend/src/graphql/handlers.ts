@@ -1,12 +1,10 @@
-import { BasicVideoInfo, YoutubeVideoImporter } from "services/youtube-populator";
+import { AnalyzedVideo, IAnalyzedVideo } from "models/analyzedVideo";
+import { Video } from "models/video";
+import { YoutubeVideoImporter } from "services/youtube-populator";
 
 
-
-export interface AnalyzeUrlArgs { source: string; args: any; context: any; info: any; }
-
-export const analyzeYoutubeVideo = async ({source, args, context, info }: AnalyzeUrlArgs): Promise<BasicVideoInfo|null> => {
+export const analyzeYoutubeVideo = async (url: string): Promise<IAnalyzedVideo|null> => {
    
-    const url = args.url;
     if (!url) return null;
 
     const videoId = retrieveUrlId(url);
@@ -14,7 +12,24 @@ export const analyzeYoutubeVideo = async ({source, args, context, info }: Analyz
 
     const videoImporter = new YoutubeVideoImporter(process.env.YOUTUBE_API_KEY as string);
    
-    const data = await videoImporter.importVideoById(videoId);
+    console.log(`Analyzing video ${url}`)
+
+    const cachedVideo = await AnalyzedVideo.findOne({ 'url': url });
+
+    if (cachedVideo) {
+      console.log(`Video ${cachedVideo.title} retrieved from cache`);
+      return cachedVideo;
+    }
+
+    console.log(`Video ${url} not found in cache, importing from youtube`);
+
+    const data: IAnalyzedVideo = await videoImporter.importVideoById(videoId);
+
+    console.log(JSON.stringify(data));
+
+    await data.save();
+
+    console.log(`Video ${data.title} imported from youtube`);
 
     return data;
     
