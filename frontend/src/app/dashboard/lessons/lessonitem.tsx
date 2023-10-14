@@ -4,16 +4,18 @@ import Image from 'next/image';
 import Card from 'react-bootstrap/Card';
 import Placeholder from 'react-bootstrap/Placeholder';
 import { useRouter } from 'next/navigation';
-import { IVideo } from "@barberopedia/shared-types"
+import { ILesson, IVideo } from "@barberopedia/shared-types"
 
 interface Props {
-  videoData: IVideo;
+  lesson: ILesson;
 }
 
 
-const VideoItem: React.FC<Props> = ({ videoData }) => {
+const LessonItem: React.FC<Props> = ({ lesson }) => {
 
-  const { thumbnail, name, channelName, source, videoId, _id } = videoData;
+  const { name, year, _id } = lesson;
+
+  let mainPictureUrl = lesson?.mainPictureUrl || "";
 
   const views = 500;
   
@@ -21,22 +23,22 @@ const VideoItem: React.FC<Props> = ({ videoData }) => {
 
 
   const cardClicked = () => {
-    if(!videoId) return console.log("No video " + videoId)
+    if(!_id) return console.log("No video " + _id)
     //router.push(source?.url)
     router.push("/dashboard/video/" + _id)
   }
 
-  console.log("VideoItem", videoData)
+  console.log("VideoItem", _id)
 
 
   return (
     <Card style={{ margin: "5px" }} onClick={cardClicked}>
       <div style={{ height: '180px', overflow: 'hidden', backgroundColor: '#e9ecef' }}>
-        {thumbnail ? (
+        {mainPictureUrl ? (
           <div style={{ maxWidth: '100%', maxHeight: '50vh' }}>
           <Image
-                src={thumbnail}
-                alt="This video has no thumbnail"
+                src={mainPictureUrl}
+                alt="This lesson has no picture"
                 layout="responsive"
                 width={400}
                 height={300}
@@ -48,11 +50,11 @@ const VideoItem: React.FC<Props> = ({ videoData }) => {
       </div>
       <Card.Body>
         <Card.Title>{name}</Card.Title>
-        <Card.Subtitle className="mb-2">{channelName}</Card.Subtitle>
-        <Card.Text>{views} views</Card.Text>
+        <Card.Subtitle className="mb-2">{year}</Card.Subtitle>
+        <Card.Text>{views}  views</Card.Text>
       </Card.Body>
     </Card>
   );
 };
 
-export default VideoItem;
+export default LessonItem;

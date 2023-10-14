@@ -4,6 +4,7 @@ import { gql, useQuery } from "@apollo/client";
 import Link from "next/link";
 import { useState } from "react";
 import LessonSelector from "../lessonselector";
+import EmptyDataBlock from "@/components/utils/emptydatablock";
 
 const GET_VIDEO = gql`
   query GetVideo($id: MongoID!) {
@@ -13,6 +14,8 @@ const GET_VIDEO = gql`
         data{
           name
         }
+        startTime
+        endTime
       }
       source {
         url
@@ -33,7 +36,7 @@ function Page({params}) {
   const [videoData, setVideoData] = useState(null);
 
 
-  const { loading, error, analyzedVideoData: data } = useQuery(GET_VIDEO, {
+  const { loading, error, data } = useQuery(GET_VIDEO, {
     variables: { id },
   });
   
@@ -46,6 +49,9 @@ function Page({params}) {
       <GoBackButton />
       {loading && <p>Loading...</p>}
       {error && <p>Error :(</p>}
+      {!videoData && !loading && (
+        <EmptyDataBlock />
+      )}
       {videoData && (
         <div>
           <h2>{videoData.name}</h2>

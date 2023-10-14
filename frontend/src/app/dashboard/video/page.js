@@ -1,16 +1,18 @@
 "use client";
-import { useState } from "react";
-import { useQuery, gql, useLazyQuery } from "@apollo/client";
-import { Form, Button, Container, Row, Col } from "react-bootstrap";
-import Link from "next/link";
+import { gql, useQuery } from "@apollo/client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Button, Col, Container, Row } from "react-bootstrap";
 import VideoItem from "./videoitem";
+import EmptyDataBlock from "@/components/utils/emptydatablock";
 
 const GET_PAGES = gql`
   query GetPages($filter: FilterFindManyVideoInput) {
     videoMany(filter: $filter) {
       _id
       name
+      thumbnail
+      videoId
       lessons {
         lessonId
         data {
@@ -18,6 +20,10 @@ const GET_PAGES = gql`
         }
         startTime
         endTime
+      }
+      source {
+        type
+        url
       }
       description
     }
@@ -54,14 +60,15 @@ function Page({ params }) {
     <Container>
       <CreateVideoButton />
       <h2>Videos:</h2>
-      <Row xs={1} sm={2} md={3} lg={4} xl={5} xxl={5}>
+      <Row xs={1} sm={2} md={3} lg={4} xl={5} xxl={5} >
         {console.log(pageData)}
         {pageData &&
           pageData.map((video) => (
-            <Col key={video._id}>
-              <VideoItem videoData={video} />
+            <Col key={video._id} style={{ padding: '10px' }}>
+              <VideoItem videoData={video}/>
             </Col>
           ))}
+        {(!loading && (!pageData || pageData.length === 0)) && <EmptyDataBlock message="No videos have been found :(" />}
       </Row>
     </Container>
   );

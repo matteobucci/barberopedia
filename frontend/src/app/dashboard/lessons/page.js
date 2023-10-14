@@ -1,9 +1,11 @@
 "use client";
 import { useState } from "react";
 import { useQuery, gql, useLazyQuery } from "@apollo/client";
-import { Form, Button } from "react-bootstrap";
+import { Form, Button, Container, Row, Col } from "react-bootstrap";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import LessonItem from "./lessonitem";
+import EmptyDataBlock from "@/components/utils/emptydatablock";
 
 export const GET_LESSONS = gql`
     query GetPages($filter: FilterFindManyLessonInput) {
@@ -48,27 +50,30 @@ function Page({params}) {
   const [id, setId] = useState(params.id);
   const [pageData, setPageData] = useState(null);
 
-  const { loading, error, analyzedVideoData: data } = useQuery(GET_LESSONS, {
+  const { loading, error, data } = useQuery(GET_LESSONS, {
     variables: { id },
   });
   
-  if (analyzedVideoData && !pageData) {
-    setPageData(analyzedVideoData.lessonMany);
+  if (data && !pageData) {
+    setPageData(data.lessonMany);
   }
 
   return (
-    <div>
+
+    <Container>
     <CreateLessonButton />
       <h2>Lessons:</h2>
-      <ul>
+      <Row xs={1} sm={2} md={3} lg={4} xl={5} xxl={5} >
         {console.log(pageData)}
-        { pageData && pageData.map(lesson => (
-          <li key={lesson._id}>
-            <Link href={`/dashboard/lessons/${lesson._id}`}>{lesson.name}</Link>
-          </li>
-        ))}
-      </ul>
-    </div>
+        {pageData &&
+          pageData.map((lesson) => (
+            <Col key={lesson._id} style={{ padding: '10px' }}>
+              <LessonItem key={lesson._id} lesson={lesson} />
+            </Col>
+          ))}
+        {(!loading && (!pageData || pageData.length === 0)) && <EmptyDataBlock message="No lessons have been found :(" />}
+      </Row>
+    </Container>
   );
 }
 

@@ -7,42 +7,9 @@ import { gql, useLazyQuery, useMutation } from "@apollo/client";
 import GoBackButton from "@/components/navigation/gobackbutton";
 import Duration from "@/components/utils/durationstrings";
 import LessonSelector from "../lessonselector";
+import { IAnalyzedVideo, IVideo } from "@barberopedia/shared-types";
 
-export interface VideoFormData {
-  name: string;
-  title: string;
-  description: string;
-  duration: string;
-  publishedAt: string;
-  thumbnail: string;
-  channelId: string;
-  channelName: string;
-  url: string;
-  commentCount: number;
-  likeCount: number;
-  viewCount: number;
-  lastFetchOn: string;
-  source: {
-    type: 'youtube';
-    url: string;
-  };
-}
 
-export interface AnalyzedVideo {
-  title: string
-  description: string
-  duration: string
-  publishedAt: string
-  thumbnail: string
-  channelId: string
-  channelName: string
-  lastFetchOn: string
-  url: string
-  commentCount?: number;
-  videoId: string;
-  likeCount?: number;
-  viewCount?: number
-}
 
 function Page() {
   const ANALYZE_URL = gql`
@@ -83,7 +50,7 @@ function Page() {
   const [
     executeAnalyze,
     { loading: analyzeLoading, data: analyzeVideoQuery, error: analyzeError },
-  ] = useLazyQuery<{ analyzeVideo: AnalyzedVideo }, { url: string }>(ANALYZE_URL);
+  ] = useLazyQuery<{ analyzeVideo: IAnalyzedVideo }, { url: string }>(ANALYZE_URL);
 
   const analyzedVideo = analyzeVideoQuery && analyzeVideoQuery.analyzeVideo;
 
@@ -91,17 +58,14 @@ function Page() {
     executeSaveVideo,
     { loading: saveLoading, data: savedVideoQuery, error: saveError },
   ] = useMutation<
-    { savedVideo: VideoFormData },
-    { record: VideoFormData }
+    { savedVideo: IVideo },
+    { record: IVideo }
   >(SAVE_VIDEO);
+  
   const savedVideo = savedVideoQuery && savedVideoQuery.savedVideo;
 
   const [inputData, setInputData] = useState({
-    name: "",
-    videoURL: "",
-    endYear: "",
-    startYear: "",
-    description: "",
+    videoURL: ""
   });
 
   const [selectedLessonId, setSelectedLessonId] = useState("");
@@ -121,24 +85,25 @@ function Page() {
 
     if(inputData && analyzedVideo){
      
-      const formVideoData: VideoFormData = {
-          url: inputData.videoURL,
+      const formVideoData: IVideo = {
           title: analyzedVideo.title,
           description: analyzedVideo.description,
           duration: analyzedVideo.duration,
-          publishedAt: analyzedVideo.publishedAt,
-          thumbnail: analyzedVideo.thumbnail,
+          publishedAt: analyzedVideo.publishedAt ?  new Date(analyzedVideo.publishedAt) : new Date(),
+          thumbnail: analyzedVideo.thumbnail || `https://img.youtube.com/vi/${analyzedVideo.videoId}/0.jpg`,
           channelId: analyzedVideo.channelId,
           channelName: analyzedVideo.channelName,
           commentCount: analyzedVideo.commentCount || 0,
           likeCount: analyzedVideo.likeCount || 0,
           viewCount: analyzedVideo.viewCount || 0,
           lastFetchOn: analyzedVideo.lastFetchOn || "",
+          videoId: analyzedVideo.videoId || "",
           source: {
             type: 'youtube',
             url: inputData.videoURL
           },
-          name: inputData.name || analyzedVideo.title
+          lessons: [],
+          name: analyzedVideo.title
       };
 
       console.log(formVideoData);
@@ -156,7 +121,7 @@ function Page() {
   return (
     <Container>
       <GoBackButton />
-      <h1>Add Lesson</h1>
+      <h1>Add Video</h1>
 
       <Form.Group controlId="formName">
         <Form.Label>Video URL</Form.Label>
@@ -189,8 +154,8 @@ function Page() {
           <Row>
             <Col md="auto">
               <img
-                style={{ width: "150px" }}
-                src={`https://img.youtube.com/vi/${analyzedVideo.id}/0.jpg`}
+                style={{ width: "200px" }}
+                src={`https://img.youtube.com/vi/${analyzedVideo.videoId}/0.jpg`}
               />
             </Col>
             <Col>
@@ -206,7 +171,8 @@ function Page() {
               </p>
             </Col>
           </Row>
-          <LessonSelector onSelect={onLessonSelected}></LessonSelector>
+          
+          {/* <LessonSelector onSelect={onLessonSelected}></LessonSelector> */}
           {saveLoading && <p>Saving Video...</p>}
           {saveError && <p>Error Saving Video: {saveError?.message}</p>}
           {!saveLoading && (

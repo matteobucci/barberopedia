@@ -1,11 +1,7 @@
+import { IHistoricalReference } from '@barberopedia/shared-types';
 import mongoose, { Document, Schema } from 'mongoose';
 
-export interface IHistoricalReference extends Document {
-    name: string;
-    description: string;
-    startYear: number;
-    endYear: number;
-}
+export interface MHistoricalReference extends IHistoricalReference, Document {}
 
 const HistoricalReferenceSchema: Schema = new Schema({
     name: { type: String, required: true },
@@ -14,4 +10,4 @@ const HistoricalReferenceSchema: Schema = new Schema({
     endYear: { type: Number }
 });
 
-export const HistoricalReference = mongoose.model<IHistoricalReference>('HistoricalReference', HistoricalReferenceSchema);
+export const HistoricalReference = mongoose.model<MHistoricalReference>('HistoricalReference', HistoricalReferenceSchema);

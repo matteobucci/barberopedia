@@ -1,12 +1,12 @@
 
-import { schemaComposer } from 'graphql-compose';
+import { Resolver, schemaComposer } from 'graphql-compose';
 import { composeMongoose } from 'graphql-compose-mongoose';
+import { AnalyzedVideo } from 'models/analyzedVideo';
 import { Character } from 'models/character';
 import { HistoricalReference } from 'models/historicalReference';
-import { ILesson, Lesson } from 'models/lesson';
+import { Lesson, MLesson } from 'models/lesson';
 import { Video } from 'models/video';
-import { AnalyzeUrlArgs, analyzeYoutubeVideo } from './handlers';
-import { AnalyzedVideo } from 'models/analyzedVideo';
+import { analyzeYoutubeVideo } from './handlers';
 
 const customizationOptions = {};
 
@@ -31,11 +31,15 @@ schemaComposer.Query.addFields({
 });
 
 schemaComposer.Mutation.addFields({
-  characterCreateOne: CharacterTC.mongooseResolvers.createOne(),
-  characterCreateMany: CharacterTC.mongooseResolvers.createMany(),
-  characterUpdateById: CharacterTC.mongooseResolvers.updateById(),
-  characterUpdateOne: CharacterTC.mongooseResolvers.updateOne(),
-  characterUpdateMany: CharacterTC.mongooseResolvers.updateMany(),
+  ...createAccess({
+    characterCreateOne: CharacterTC.mongooseResolvers.createOne(),
+    characterCreateMany: CharacterTC.mongooseResolvers.createMany(),
+  }),
+  ...updateAccess({
+    characterUpdateById: CharacterTC.mongooseResolvers.updateById(),
+    characterUpdateOne: CharacterTC.mongooseResolvers.updateOne(),
+    characterUpdateMany: CharacterTC.mongooseResolvers.updateMany()
+  }),
   characterRemoveById: CharacterTC.mongooseResolvers.removeById(),
   characterRemoveOne: CharacterTC.mongooseResolvers.removeOne(),
   characterRemoveMany: CharacterTC.mongooseResolvers.removeMany(),
@@ -62,11 +66,15 @@ schemaComposer.Query.addFields({
 });
 
 schemaComposer.Mutation.addFields({
-  historicalReferenceCreateOne: HistoricalReferenceTC.mongooseResolvers.createOne(),
-  historicalReferenceCreateMany: HistoricalReferenceTC.mongooseResolvers.createMany(),
-  historicalReferenceUpdateById: HistoricalReferenceTC.mongooseResolvers.updateById(),
-  historicalReferenceUpdateOne: HistoricalReferenceTC.mongooseResolvers.updateOne(),
-  historicalReferenceUpdateMany: HistoricalReferenceTC.mongooseResolvers.updateMany(),
+  ...createAccess({
+    historicalReferenceCreateOne: HistoricalReferenceTC.mongooseResolvers.createOne(),
+    historicalReferenceCreateMany: HistoricalReferenceTC.mongooseResolvers.createMany(),
+  }),
+  ...updateAccess({
+    historicalReferenceUpdateById: HistoricalReferenceTC.mongooseResolvers.updateById(),
+    historicalReferenceUpdateOne: HistoricalReferenceTC.mongooseResolvers.updateOne(),
+    historicalReferenceUpdateMany: HistoricalReferenceTC.mongooseResolvers.updateMany()
+  }),
   historicalReferenceRemoveById: HistoricalReferenceTC.mongooseResolvers.removeById(),
   historicalReferenceRemoveOne: HistoricalReferenceTC.mongooseResolvers.removeOne(),
   historicalReferenceRemoveMany: HistoricalReferenceTC.mongooseResolvers.removeMany(),
@@ -77,7 +85,7 @@ const LessonTC = composeMongoose(Lesson, customizationOptions);
 LessonTC.addRelation('mainCharacter', {
   resolver: () => CharacterTC.mongooseResolvers.findById(),
   prepareArgs: {
-    _id: (source: ILesson) => source.mainCharacter,
+    _id: (source: MLesson) => source.mainCharacter,
   },
   projection: { mainCharacter: true }
 });
@@ -87,7 +95,7 @@ LessonTC.addRelation(
   {
     resolver: () => CharacterTC.mongooseResolvers.dataLoaderMany(),
     prepareArgs: {
-      _ids: (source: ILesson) => source.secondaryCharacters
+      _ids: (source: MLesson) => source.secondaryCharacters
     },
     projection: { secondaryCharacters: 1 },
   }
@@ -98,7 +106,7 @@ LessonTC.addRelation(
   {
     resolver: () => HistoricalReferenceTC.mongooseResolvers.dataLoaderMany(),
     prepareArgs: {
-      _ids: (source: ILesson) => source.historicalReferences
+      _ids: (source: MLesson) => source.historicalReferences
     },
     projection: { historicalReferences: 1 },
   }
@@ -123,11 +131,15 @@ schemaComposer.Query.addFields({
 });
 
 schemaComposer.Mutation.addFields({
-  lessonCreateOne: LessonTC.mongooseResolvers.createOne(),
-  lessonCreateMany: LessonTC.mongooseResolvers.createMany(),
-  lessonUpdateById: LessonTC.mongooseResolvers.updateById(),
-  lessonUpdateOne: LessonTC.mongooseResolvers.updateOne(),
-  lessonUpdateMany: LessonTC.mongooseResolvers.updateMany(),
+  ...createAccess({
+    lessonCreateOne: LessonTC.mongooseResolvers.createOne(),
+    lessonCreateMany: LessonTC.mongooseResolvers.createMany(),
+  }),
+  ...updateAccess({
+    lessonUpdateById: LessonTC.mongooseResolvers.updateById(),
+    lessonUpdateOne: LessonTC.mongooseResolvers.updateOne(),
+    lessonUpdateMany: LessonTC.mongooseResolvers.updateMany(),
+  }),
   lessonRemoveById: LessonTC.mongooseResolvers.removeById(),
   lessonRemoveOne: LessonTC.mongooseResolvers.removeOne(),
   lessonRemoveMany: LessonTC.mongooseResolvers.removeMany(),
@@ -165,15 +177,104 @@ schemaComposer.Query.addFields({
 });
 
 schemaComposer.Mutation.addFields({
+  ...updateAccess({
+    videoUpdateById: VideoTC.mongooseResolvers.updateById(),
+    videoUpdateOne: VideoTC.mongooseResolvers.updateOne(),
+    videoUpdateMany: VideoTC.mongooseResolvers.updateMany(),
+  }),
+  ...createAccess({
   videoCreateOne: VideoTC.mongooseResolvers.createOne(),
   videoCreateMany: VideoTC.mongooseResolvers.createMany(),
-  videoUpdateById: VideoTC.mongooseResolvers.updateById(),
-  videoUpdateOne: VideoTC.mongooseResolvers.updateOne(),
-  videoUpdateMany: VideoTC.mongooseResolvers.updateMany(),
+  }),
   videoRemoveById: VideoTC.mongooseResolvers.removeById(),
   videoRemoveOne: VideoTC.mongooseResolvers.removeOne(),
   videoRemoveMany: VideoTC.mongooseResolvers.removeMany(),
 });
+
+function createAccess(resolvers: { [key: string]: Resolver<any, any, any> }) {
+  Object.keys(resolvers).forEach((k) => {
+    resolvers[k] = resolvers[k].wrapResolve(next => async rp => {
+
+      // extend resolve params with hook
+      rp.beforeRecordMutate = async function(doc: any, resolveParams: any) { 
+
+        const userId =  resolveParams.context.userId;
+        
+        doc.createdBy = userId;
+        doc.updatedBy = userId;
+        doc.createdAt = new Date();
+        doc.updatedAt = new Date();
+
+        return doc;
+      }
+
+      return next(rp)
+    })
+  })
+  return resolvers
+}
+
+function updateAccess(resolvers: { [key: string]: Resolver<any, any, any> }) {
+  Object.keys(resolvers).forEach((k) => {
+    resolvers[k] = resolvers[k].wrapResolve(next => async rp => {
+
+      // extend resolve params with hook
+      rp.beforeRecordMutate = async function(doc: any, rp: any) { 
+
+        const { userId, isAdmin } = rp.context;
+
+        const updatedBy = doc.updatedBy;
+
+        if (!isAdmin && updatedBy !== userId) {
+          throw new Error('Forbidden!');
+        }
+
+        doc.updatedBy = userId;
+        doc.updatedAt = new Date();
+
+        return doc;
+      }
+
+      return next(rp)
+    })
+  })
+  return resolvers
+}
+
+function updateMyOwnResourcesOrAdmin(resolvers: { [key: string]: Resolver<any, any, any> }) {
+    Object.keys(resolvers).forEach((k) => {
+      resolvers[k] = resolvers[k].wrapResolve(next => async rp => {
+
+        rp.beforeRecordMutate = async function(doc: any, rp: any) {
+          
+            
+        }
+  
+        return next(rp)
+      })
+    });
+}
+
+
+
+function adminAccess(resolvers: { [key: string]: Resolver<any, any, any> }) {
+  Object.keys(resolvers).forEach((k) => {
+    resolvers[k] = resolvers[k].wrapResolve(next => async rp => {
+
+      // extend resolve params with hook
+      rp.beforeRecordMutate = async function(doc: any, rp: any) { 
+        doc.createdBy = 'admin';
+        doc.updatedBy = 'admin';
+        doc.createdAt = new Date();
+        doc.updatedAt = new Date();
+        return doc;
+      }
+
+      return next(rp)
+    })
+  })
+  return resolvers
+}
 
 const AnalyzedVideoTC = composeMongoose(AnalyzedVideo, customizationOptions);
 

@@ -1,0 +1,19 @@
+{
+  "name": "@barberopedia/shared-types",
+  "version": "1.0.0",
+  "description": "Shared TypeScript Definitions",
+  "main": "./dist/index.d.ts",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "files": [
+    "dist"
+  ],
+  "author": "Your Name",
+  "license": "ISC",
+  "private": false,
+  "dependencies": {
+    "typescript": "^5.2.2"
+  }
+}

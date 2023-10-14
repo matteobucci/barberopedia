@@ -1,9 +1,10 @@
 "use client";
-import { gql, useQuery } from "@apollo/client";
+import { graphql } from "@/gql";
+import { useQuery } from "@apollo/experimental-nextjs-app-support/ssr";
 import { useState } from "react";
 import { Card, Col, Row } from "react-bootstrap";
 
-export const GET_LESSONS = gql`
+export const GET_LESSONS = graphql(`
     query GetLessons($filter: FilterFindManyLessonInput) {
         lessonMany(filter: $filter) {
             _id
@@ -22,7 +23,7 @@ export const GET_LESSONS = gql`
             description
             }
         }
-`;
+`);
 
 interface LessonSelectorProps {
     onSelect: (id: string) => void;
@@ -32,7 +33,7 @@ function LessonSelector(props: LessonSelectorProps) {
     const [selectedId, setSelectedId] = useState("");
     const [componentData, setPageData] = useState<any[] | null>(null);
 
-    const { loading, error, analyzedVideoData: data } = useQuery(GET_LESSONS, {
+    const { loading, error, data } = useQuery(GET_LESSONS, {
         variables: { filter: {} },
     });
 

@@ -1,16 +1,8 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { ILesson } from "@barberopedia/shared-types"
 
-export interface ILesson extends Document {
-    name: string;
-    description: string;
-    category: string;
-    mainPictureUrl: string;
-    tags: string[];
-    year: number;
-    lessonCreatedOn: Date;
-    eventName: string;
-    createdAt: Date;
-    updatedAt: Date;
+
+export interface MLesson extends ILesson, Document {
     mainCharacter: mongoose.Types.ObjectId;
     secondaryCharacters: mongoose.Types.ObjectId[];
     historicalReferences: mongoose.Types.ObjectId[];
@@ -31,4 +23,4 @@ const LessonSchema: Schema = new Schema({
     historicalReferences: [{ type: Schema.Types.ObjectId, ref: 'HistoricalReference' }]
 });
 
-export const Lesson = mongoose.model<ILesson>('Lesson', LessonSchema);
+export const Lesson = mongoose.model<MLesson>('Lesson', LessonSchema);

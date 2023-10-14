@@ -1,28 +1,7 @@
 import mongoose, { Document, Schema } from 'mongoose';
+import { IVideo } from '@barberopedia/shared-types';
 
-export interface IVideo extends Document {
-  name: string;
-  title: string;
-  description: string;
-  duration: string;
-  publishedAt: Date;
-  thumbnail: string;
-  channelId: string;
-  channelName: string;
-  commentCount: number;
-  likeCount: number;
-  viewCount: number;
-  lastFetchOn: Date;
-  lessons: {
-    lessonId: mongoose.Types.ObjectId;
-    startTime: number;
-    endTime: number;
-  }[];
-  source: {
-    type: 'youtube';
-    url: string;
-  };
-}
+export interface MVideo extends IVideo, Document {}
 
 const VideoSchema: Schema = new Schema({
   name: { type: String, required: true },
@@ -32,12 +11,16 @@ const VideoSchema: Schema = new Schema({
   publishedAt: { type: Date, required: true },
   thumbnail: { type: String, required: true },
   channelId: { type: String, required: true },
+  videoId: { type: String, required: true },
   channelName: { type: String, required: true },
-  url: { type: String, required: true },
   commentCount: { type: Number, required: true },
   likeCount: { type: Number, required: true },
   viewCount: { type: Number, required: true },
   lastFetchOn: { type: Date, required: true },
+  updatedAt: { type: Date, required: false },
+  createdAt: { type: Date, required: false },
+  createdBy: { type: String, required: false },
+  updatedBy: { type: String, required: false },
   lessons: [{
     lessonId: { type: Schema.Types.ObjectId, ref: 'Lesson', required: true },
     startTime: { type: Number },
@@ -49,4 +32,4 @@ const VideoSchema: Schema = new Schema({
   }
 });
 
-export const Video = mongoose.model<IVideo>('Video', VideoSchema);
+export const Video = mongoose.model<MVideo>('Video', VideoSchema);
